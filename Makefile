@@ -206,13 +206,21 @@ ${DIST}/linux/amd64/kops ${DIST}/linux/arm64/kops: ${DIST}/linux/%/kops:
 	mkdir -p ${DIST}
 	GOOS=linux GOARCH=$* go build ${GCFLAGS} -a ${EXTRA_BUILDFLAGS} -o $@ ${LDFLAGS}"${EXTRA_LDFLAGS} -X k8s.io/kops.Version=${VERSION} -X k8s.io/kops.GitVersion=${GITSHA}" k8s.io/kops/cmd/kops
 
+.PHONY: ${DIST}/linux/arm/kops
+${DIST}/linux/arm/kops:
+	mkdir -p ${DIST}
+	GOOS=linux GOARCH=arm GOARM=7 go build ${GCFLAGS} -a ${EXTRA_BUILDFLAGS} -o $@ ${LDFLAGS}"${EXTRA_LDFLAGS} -X k8s.io/kops.Version=${VERSION} -X k8s.io/kops.GitVersion=${GITSHA}" k8s.io/kops/cmd/kops
+
 .PHONY: ${DIST}/windows/amd64/kops.exe
 ${DIST}/windows/amd64/kops.exe:
 	mkdir -p ${DIST}
 	GOOS=windows GOARCH=amd64 go build ${GCFLAGS} -a ${EXTRA_BUILDFLAGS} -o $@ ${LDFLAGS}"${EXTRA_LDFLAGS} -X k8s.io/kops.Version=${VERSION} -X k8s.io/kops.GitVersion=${GITSHA}" k8s.io/kops/cmd/kops
 
 .PHONY: crossbuild
-crossbuild: ${DIST}/windows/amd64/kops.exe ${DIST}/darwin/amd64/kops ${DIST}/darwin/arm64/kops ${DIST}/linux/amd64/kops ${DIST}/linux/arm64/kops
+crossbuild: ${DIST}/windows/amd64/kops.exe ${DIST}/darwin/amd64/kops ${DIST}/darwin/arm64/kops ${DIST}/linux/amd64/kops ${DIST}/linux/arm64/kops ${DIST}/linux/arm/kops
+
+.PHONY: crossbuild-arm
+crossbuild: ${DIST}/linux/arm/kops
 
 .PHONY: upload
 upload: bazel-version-dist # Upload kops to S3
